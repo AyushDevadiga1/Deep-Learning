@@ -1,0 +1,238 @@
+Love this question — GPUs have one of the most fascinating origin stories in computing. Let's go from the very beginning.
+
+---
+
+## First, understand what a CPU actually is
+
+A CPU (Central Processing Unit) is built to be a **generalist**. It can do anything — run your browser, handle your file system, play music, run a game's logic, respond to keyboard input, all at once.
+
+To do all of this well, CPUs are designed around one core philosophy:
+
+> **Do one thing at a time, but do it incredibly fast and intelligently.**
+
+A modern CPU core can execute a single instruction in a fraction of a nanosecond. It also has clever tricks:
+- **Branch prediction** — it guesses what your code will do next and starts doing it early
+- **Out-of-order execution** — it rearranges instructions to avoid waiting
+- **Large caches** — it stores recently used data close by to avoid slow memory trips
+
+A typical CPU has **4 to 16 cores**. Each core is a masterpiece of engineering — complex, powerful, and very capable of handling varied, unpredictable tasks.
+
+The problem? Deep learning doesn't need a generalist. It needs a specialist.
+
+---
+
+## What does deep learning actually compute?
+
+Strip away all the theory. At its heart, a neural network is doing this, over and over:
+
+```
+output = weight_1 * input_1
+       + weight_2 * input_2
+       + weight_3 * input_3
+       + ...
+       + weight_n * input_n
+```
+
+This is called a **dot product**. And in matrix form, training a neural network is just millions of these dot products happening across huge grids of numbers — called **matrix multiplications**.
+
+Here's the thing about these calculations:
+- They are **stupidly simple** (just multiply and add)
+- They are **massively parallel** — no calculation depends on another
+- There are **billions of them**
+
+This is the exact opposite of what a CPU is good at. A CPU is a brilliant surgeon doing one delicate operation at a time. Deep learning needs ten thousand factory workers doing the same simple task simultaneously.
+
+---
+
+## Where GPUs came from — the origin story
+
+In the early 1990s, video games were becoming popular. Rendering a 3D game frame means calculating the color and position of millions of pixels — and doing it 60 times per second.
+
+Sound familiar? Millions of simple calculations, all independent, all needing to happen at the same time.
+
+Game companies needed a chip that could handle this. So graphics card manufacturers like Nvidia and ATI (now AMD) built exactly that — a chip with **hundreds to thousands of small, simple cores**, all working in parallel.
+
+The original GPU was not designed for AI. It was designed so your character in Quake didn't look like a slideshow.
+
+```
+CPU design philosophy:
+[ 1 brilliant core ] → does complex task A
+                     → then complex task B
+                     → then complex task C
+  (fast, flexible, sequential)
+
+GPU design philosophy:
+[ core ][ core ][ core ][ core ][ core ][ core ]
+[ core ][ core ][ core ][ core ][ core ][ core ]
+[ core ][ core ][ core ][ core ][ core ][ core ]
+  ...thousands more...
+  all doing the SAME simple task simultaneously
+  (slower per core, but massively parallel)
+```
+
+A GPU core is far simpler than a CPU core — it has no branch prediction, no out-of-order execution, almost no cache. It's dumb by design. But there are thousands of them.
+
+---
+
+## The accidental discovery (around 2007–2012)
+
+In 2007, Nvidia released **CUDA** — a programming toolkit that let software developers write code that ran on the GPU, not just for graphics but for any computation.
+
+Researchers at universities (notably Geoffrey Hinton's group at Toronto, and Andrew Ng at Stanford) tried running neural network training on GPUs using CUDA.
+
+The results were shocking. Training that took **weeks on a CPU** finished in **hours on a GPU**.
+
+The key 2012 moment: AlexNet, a deep neural network, won the ImageNet image recognition competition by a massive margin — and it was trained on two Nvidia GTX 580 GPUs. That was the gunshot that started the modern AI race.
+
+---
+
+## Why CPUs didn't just "get faster" to catch up
+
+You might ask: why not just make CPUs faster?
+
+The answer is **Amdahl's Law** — a principle that says: if part of your task must happen sequentially (one step waiting for another), adding more parallel speed only helps the parallel parts.
+
+Matrix multiplication is almost entirely parallel. On a CPU with 8 cores, you can split the work 8 ways. On a GPU with 4,000 cores, you split it 4,000 ways. The CPU simply cannot compete here, no matter how fast each of its individual cores gets.
+
+Also, CPUs use most of their transistor budget on that complex "smart" machinery — caches, branch predictors, schedulers. A GPU spends those transistors on more computation units instead.
+
+```
+Transistor budget comparison (simplified):
+
+CPU:
+[  cache  ][  cache  ][ branch predict ][ scheduler ][ 8 compute units ]
+
+GPU:
+[ 4,000+ compute units ][ small cache ]
+```
+
+---
+
+## Then came TPUs — why weren't GPUs enough?
+
+By 2015, Google was running neural networks at a scale nobody had before — billions of search queries, YouTube recommendations, Google Translate, all powered by deep learning.
+
+They had a problem: GPUs are general-purpose parallel processors. They're great at matrix math, but they still carry overhead for graphics-related work. They also consume enormous amounts of power.
+
+Google asked: what if we built a chip that does **only one thing** — the specific matrix math neural networks need — with zero overhead for anything else?
+
+The result was the **TPU (Tensor Processing Unit)**, first deployed internally in 2015, announced publicly in 2016.
+
+A TPU strips away everything a GPU does that neural networks don't need. It has a massive **systolic array** — a grid of multiply-and-add units wired directly to each other in a pipeline, designed specifically for the way neural network matrix math flows.
+
+```
+GPU:  general parallel processor
+      good at: matrix math, graphics, simulations
+      some wasted capacity on non-AI tasks
+
+TPU:  single-purpose accelerator
+      good at: ONLY tensor (matrix) math for neural networks
+      no wasted capacity, extremely power efficient for AI
+```
+
+Google's TPUs are not for sale — they use them in their own data centers. When you use Google Translate or search, TPUs are doing the work.
+
+---
+
+## Edge GPUs — the new frontier
+
+Now a different problem emerged. You've trained a model in a data center. But you want it to run:
+- On your phone (face unlock, voice assistant)
+- In a car (real-time obstacle detection)
+- In a security camera (detecting people)
+- On a medical device (analyzing scans in an ambulance)
+
+You can't send everything to a data center — too slow, too expensive, needs internet. You need the model to run **on the device itself**. This is called **inference at the edge** (edge = device, not data center).
+
+But these devices have tiny batteries and small chips. A full GPU would drain your phone in minutes.
+
+Enter **Edge GPUs and neural processing units (NPUs)**:
+
+- **Nvidia Jetson** — a small board with a GPU designed for robots, drones, cameras
+- **Apple Neural Engine** — inside every iPhone since 2017, runs Face ID and Siri locally
+- **Google Edge TPU** — a tiny chip the size of your thumbnail, runs TensorFlow Lite models
+- **Qualcomm Hexagon DSP** — inside Android phones, handles AI tasks
+
+These chips make a different tradeoff: they run only **already-trained models** (inference, not training), at lower power, on smaller tasks.
+
+```
+Training (data center):
+  → needs massive compute, power is irrelevant
+  → full GPU or TPU cluster
+
+Inference (edge device):
+  → needs low power, small size, fast enough for real-time
+  → Edge GPU, NPU, or Apple Neural Engine
+```
+
+---
+
+## How is a GPU programmed? (This is where it gets interesting)
+
+A CPU runs normal code — your Python, your Java, step by step. A GPU cannot do this. It has a completely different programming model.
+
+**The core idea: you write one function (called a kernel) and it runs on thousands of cores simultaneously, each one working on a different piece of data.**
+
+With CUDA (Nvidia's toolkit), you write code that looks a bit like C, but you tag it with special keywords:
+
+```
+// Normal CPU function: adds two arrays
+for i in range(1000000):
+    C[i] = A[i] + B[i]
+    // one element at a time, one million loops
+
+// GPU kernel: adds two arrays  
+__global__ void add(A, B, C):
+    i = threadIdx   // each of the 1,000,000 threads knows its own index
+    C[i] = A[i] + B[i]
+    // all one million elements added simultaneously
+```
+
+The GPU's job is to **spawn thousands of these tiny threads** and run them all at once. You don't loop — you launch.
+
+PyTorch and TensorFlow hide all of this from you. When you write `torch.matmul(A, B)`, it automatically sends that work to the GPU and handles all the CUDA complexity underneath. This is why those libraries were such a big deal — they made GPU programming invisible to the researcher.
+
+---
+
+## What changed over the decades — the arc of history
+
+```
+1990s:
+  GPUs built purely for 3D games
+  CPUs handle all serious computation
+
+Early 2000s:
+  Researchers notice GPUs are fast at math
+  But no good tools to use them for non-graphics tasks
+
+2007:
+  Nvidia releases CUDA — GPUs become programmable for general computation
+  First experiments with neural networks on GPUs
+
+2012:
+  AlexNet wins ImageNet using GPUs — the world notices
+  Deep learning goes from academic curiosity to serious field
+
+2015–2016:
+  Google deploys TPUs internally — specialized AI hardware begins
+  Nvidia releases Pascal GPU architecture, first truly great AI GPU
+
+2017–2019:
+  Every major company builds AI chips
+  Apple Neural Engine ships in iPhone X (2017)
+  Nvidia Volta and Tensor Cores — first GPU hardware specifically for matrix math
+
+2020–present:
+  Nvidia H100 — a chip designed almost entirely around AI workloads
+  Edge AI chips in every phone, car, and camera
+  TPU v4, v5 powering Google's largest models
+  New entrants: AMD MI300, Intel Gaudi, Cerebras, Graphcore
+```
+
+---
+
+## The one-line summary of everything
+
+A CPU is a versatile genius — a few brilliant minds doing complex, varied work. A GPU is an army of simple workers all doing the same calculation simultaneously. Deep learning turned out to need the army, not the genius. Once that was clear, the entire hardware industry reorganized itself around building better and better armies — specialized for AI, shrunk for phones, optimized for power — and that hardware wave is what made modern AI possible.
+
+Everything you'll train in PyTorch sits on top of this history.
