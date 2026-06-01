@@ -1,1 +1,4 @@
 # A place to ignore files
+
+.venv
+.gitignore
