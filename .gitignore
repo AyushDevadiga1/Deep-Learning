@@ -1,4 +1,5 @@
 # A place to ignore files
 
 .venv
+.venv-1
 .vscode
