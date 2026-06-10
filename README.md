@@ -4,3 +4,6 @@ The playlist I am reffering to is - campusX's 100 Days of Deep Learning:
 <br>
         https://www.youtube.com/playlist?list=PLKnIA16_RmvYuZauWaPlRTC54KxSNLtNn
 </p>
+
+Topic Completed : 
+                        ANN 
