@@ -1,0 +1,60 @@
+
+<div style="position: relative; width: 100%; height: 340px;">
+<canvas id="actChart" role="img" aria-label="Line chart comparing shapes of sigmoid, tanh, ReLU, leaky ReLU, ELU, and GELU activation functions across input range -5 to 5">Sigmoid ranges 0 to 1 with an S-curve. Tanh ranges -1 to 1. ReLU is flat zero then linear. Leaky ReLU has a small negative slope. ELU curves smoothly below zero. GELU dips slightly negative before rising.</canvas>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 14px; margin-top: 10px; font-size: 12px; color: var(--text-secondary);">
+<span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:#2a78d6;"></span>Sigmoid</span>
+<span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:#1baf7a;"></span>Tanh</span>
+<span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:#eda100;"></span>ReLU</span>
+<span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:#4a3aa7;"></span>Leaky ReLU</span>
+<span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:#e34948;"></span>ELU</span>
+<span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:#e87ba4;"></span>GELU</span>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+function erf(x) {
+  const sign = x >= 0 ? 1 : -1;
+  x = Math.abs(x);
+  const a1=0.254829592,a2=-0.284496736,a3=1.421413741,a4=-1.453152027,a5=1.061405429,p=0.3275911;
+  const t = 1/(1+p*x);
+  const y = 1-(((((a5*t+a4)*t)+a3)*t+a2)*t+a1)*t*Math.exp(-x*x);
+  return sign*y;
+}
+function gelu(x){ return x*0.5*(1+erf(x/Math.SQRT2)); }
+function sigmoid(x){ return 1/(1+Math.exp(-x)); }
+
+const xs = [];
+for (let x = -5; x <= 5; x += 0.1) xs.push(Math.round(x*10)/10);
+
+const sigmoidData = xs.map(x => sigmoid(x));
+const tanhData = xs.map(x => Math.tanh(x));
+const reluData = xs.map(x => Math.max(0, x));
+const leakyData = xs.map(x => x > 0 ? x : 0.1*x);
+const eluData = xs.map(x => x > 0 ? x : (Math.exp(x)-1));
+const geluData = xs.map(x => gelu(x));
+
+new Chart(document.getElementById('actChart'), {
+  type: 'line',
+  data: {
+    labels: xs,
+    datasets: [
+      { label: 'Sigmoid', data: sigmoidData, borderColor: '#2a78d6', borderWidth: 2, pointRadius: 0, tension: 0 },
+      { label: 'Tanh', data: tanhData, borderColor: '#1baf7a', borderWidth: 2, pointRadius: 0, tension: 0, borderDash: [6,3] },
+      { label: 'ReLU', data: reluData, borderColor: '#eda100', borderWidth: 2, pointRadius: 0, tension: 0 },
+      { label: 'Leaky ReLU', data: leakyData, borderColor: '#4a3aa7', borderWidth: 2, pointRadius: 0, tension: 0, borderDash: [2,2] },
+      { label: 'ELU', data: eluData, borderColor: '#e34948', borderWidth: 2, pointRadius: 0, tension: 0 },
+      { label: 'GELU', data: geluData, borderColor: '#e87ba4', borderWidth: 2, pointRadius: 0, tension: 0, borderDash: [6,3] }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } },
+    interaction: { mode: 'index', intersect: false },
+    scales: {
+      x: { title: { display: true, text: 'z', color: '#898781' }, ticks: { color: '#898781', maxTicksLimit: 11 }, grid: { color: '#e1e0d9' } },
+      y: { title: { display: true, text: 'f(z)', color: '#898781' }, ticks: { color: '#898781' }, grid: { color: '#e1e0d9' } }
+    }
+  }
+});
+</script>
