@@ -3,7 +3,8 @@
 .venv
 .venv-1
 .vscode
+.ipynb_checkpoints
 
 references
-NLP_experiments
+nlp/NLP_experiments
 insurance_tuning_small\neural-network-insurance-1
